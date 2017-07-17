@@ -1,0 +1,3 @@
+[submodule "GMADFileFormat"]
+	path = GMADFileFormat
+	url = https://github.com/GGG-KILLER/GMADFileFormat
