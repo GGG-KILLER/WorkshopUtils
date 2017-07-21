@@ -80,6 +80,7 @@ namespace WorkshopUtils.UI.GLuaHighlighter
                 else if ( next == '-' && Next ( 2 ) == '-' )
                 {
                     SubmitBuffer ( );
+                    Read ( 2 );
                     ret.Add ( ReadComment ( ) );
                 }
                 else if ( next == '/' && Next ( 2 ) == '*' )
@@ -266,7 +267,7 @@ namespace WorkshopUtils.UI.GLuaHighlighter
             ) )
             {
                 // Get [ and then all the way until the other [
-                var init = Read ( ) + ReadUntil ( '[' );
+                var init = $"{Read ( )}{ReadUntil ( '[' )}{Read ( )}";
                 var ret = ReadLongString ( init );
                 ret.Type = HighlightTokenTypes.Comment;
                 ret.Raw = "--" + ret.Raw;
