@@ -18,28 +18,28 @@ namespace WorkshopUtils.UI
         public GMAParserForm ( )
         {
             InitializeComponent ( );
-            bw = new BackgroundWorker ( );
-            bw.DoWork += this.Bw_DoWork;
+            this.bw = new BackgroundWorker ( );
+            this.bw.DoWork += this.Bw_DoWork;
         }
 
-        public void ParseData ( Byte[] data, Int64 ID, String WorkshopURL )
+        public void ParseData ( Byte[] data )
         {
-            var addon = GMADParser.Parse ( data);
+            GMADAddon addon = GMADParser.Parse ( data);
             this.addon = addon;
 
             this.InvokeEx ( a =>
             {
-                txtAddonName.Text = addon.Name;
-                txtAddonVersion.Text = addon.Version.ToString ( );
-                txtAuthorName.Text = addon.Author.Name;
-                txtAuthorSteamID.Text = addon.Author.SteamID64.ToString ( );
-                txtDescription.Text = addon.Description;
-                txtFormatVersion.Text = addon.FormatVersion.ToString ( );
-                txtTimestamp.Text = addon.Timestamp.ToString ( );
+                this.txtAddonName.Text = addon.Name;
+                this.txtAddonVersion.Text = addon.Version.ToString ( );
+                this.txtAuthorName.Text = addon.Author.Name;
+                this.txtAuthorSteamID.Text = addon.Author.SteamID64.ToString ( );
+                this.txtDescription.Text = addon.Description;
+                this.txtFormatVersion.Text = addon.FormatVersion.ToString ( );
+                this.txtTimestamp.Text = addon.Timestamp.ToString ( );
 
-                lbFiles.Items.Clear ( );
-                foreach ( var file in addon.Files )
-                    lbFiles.Items.Add ( file.Path );
+                this.lbFiles.Items.Clear ( );
+                foreach ( GMADAddon.File file in addon.Files )
+                    this.lbFiles.Items.Add ( file.Path );
             } );
         }
 
@@ -50,7 +50,7 @@ namespace WorkshopUtils.UI
 
         private void Button1_Click ( Object sender, EventArgs e )
         {
-            if ( ParsingUnderway )
+            if ( this.ParsingUnderway )
                 return;
 
             using ( var ofd = new OpenFileDialog
@@ -62,11 +62,11 @@ namespace WorkshopUtils.UI
                 Title = "GMA Parser"
             } )
             {
-                var r = ofd.ShowDialog ( );
+                DialogResult r = ofd.ShowDialog ( );
                 if ( r != DialogResult.OK )
                     return;
 
-                txtFn.Text = ofd.FileName;
+                this.txtFn.Text = ofd.FileName;
                 TriggerGMAParse ( );
             }
         }
@@ -77,31 +77,31 @@ namespace WorkshopUtils.UI
             if ( !fsd.ShowDialog ( this.Handle ) )
                 return;
 
-            foreach ( var file in addon.Files )
+            foreach ( GMADAddon.File file in this.addon.Files )
             {
                 var path = Path.Combine ( fsd.FileName, file.Path );
                 var di = new DirectoryInfo ( Path.GetDirectoryName ( path ) );
                 var fi = new FileInfo ( path );
                 di.Create ( );
-                using ( var writer = fi.OpenWrite ( ) )
+                using ( FileStream writer = fi.OpenWrite ( ) )
                     writer.Write ( file.Data, 0, file.Data.Length );
             }
         }
 
         private void Bw_DoWork ( Object _, DoWorkEventArgs __ )
         {
-            ParsingUnderway = true;
-            var fn = txtFn.Text;
+            this.ParsingUnderway = true;
+            var fn = this.txtFn.Text;
             Byte[] data;
             try
             {
-                using ( var reader = File.OpenRead ( fn ) )
+                using ( FileStream reader = File.OpenRead ( fn ) )
                 using ( var ms = new MemoryStream ( ) )
                 {
                     reader.CopyTo ( ms );
                     data = ms.ToArray ( );
                 }
-                ParseData ( data, -1, null );
+                ParseData ( data );
             }
             catch ( Exception e )
             {
@@ -113,21 +113,21 @@ namespace WorkshopUtils.UI
         {
             this.InvokeEx ( d =>
             {
-                using ( var w = Dbg.GetTbForm ( a ) )
+                using ( Form w = Dbg.GetTbForm ( a ) )
                     w.ShowDialog ( d );
             } );
         }
 
         private void LbFiles_DoubleClick ( Object sender, EventArgs e )
         {
-            if ( lbFiles.SelectedItem != null )
+            if ( this.lbFiles.SelectedItem != null )
             {
-                var name = lbFiles.SelectedItem.ToString ( );
-                foreach ( var file in addon.Files )
+                var name = this.lbFiles.SelectedItem.ToString ( );
+                foreach ( GMADAddon.File file in this.addon.Files )
                 {
                     if ( file.Path == name )
                     {
-                        using ( var w = Dbg.GetGLuaForm (
+                        using ( Form w = Dbg.GetGLuaForm (
                                Encoding.UTF8.GetString ( file.Data )
                               .Replace ( "\n", Environment.NewLine )
                               .Replace ( "\r\r", "\r" ) ) )
@@ -142,9 +142,9 @@ namespace WorkshopUtils.UI
 
         private void TriggerGMAParse ( )
         {
-            if ( ParsingUnderway )
+            if ( this.ParsingUnderway )
                 return;
-            bw.RunWorkerAsync ( );
+            this.bw.RunWorkerAsync ( );
         }
     }
 }

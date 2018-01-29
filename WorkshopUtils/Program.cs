@@ -5,6 +5,8 @@ namespace WorkshopUtils
 {
     internal static class Program
     {
+        internal static String APIKey;
+
         /// <summary>
         /// The main entry point for the application.
         /// </summary>

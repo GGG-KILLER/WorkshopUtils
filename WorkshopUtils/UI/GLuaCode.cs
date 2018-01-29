@@ -25,38 +25,38 @@ namespace WorkshopUtils.UI
         public GLuaCode ( )
         {
             InitializeComponent ( );
-            base.BackColor = Background;
+            base.BackColor = this.Background;
             base.BorderStyle = BorderStyle.None;
             base.ReadOnly = true;
         }
 
         public void SetCode ( String Code )
         {
-            var tokens = GLuaHighlightTokenizer.Tokenize ( Code );
-            foreach ( var token in tokens )
+            System.Collections.Generic.IEnumerable<HighlightToken> tokens = GLuaHighlightTokenizer.Tokenize ( Code );
+            foreach ( HighlightToken token in tokens )
             {
                 switch ( token.Type )
                 {
                     case HighlightTokenTypes.Comment:
-                        this.AppendText ( token.Raw, Comment );
+                        this.AppendText ( token.Raw, this.Comment );
                         break;
 
                     case HighlightTokenTypes.GLuaFunc:
-                        this.AppendText ( token.Raw, Builtin );
+                        this.AppendText ( token.Raw, this.Builtin );
                         break;
 
                     case HighlightTokenTypes.Whitespace:
                     case HighlightTokenTypes.JustPrintTM:
-                        this.AppendText ( token.Raw, NormalText );
+                        this.AppendText ( token.Raw, this.NormalText );
                         break;
 
                     case HighlightTokenTypes.Number:
                     case HighlightTokenTypes.String:
-                        this.AppendText ( token.Raw, Literals );
+                        this.AppendText ( token.Raw, this.Literals );
                         break;
 
                     case HighlightTokenTypes.SyntaxIdentifier:
-                        this.AppendText ( token.Raw, Keyword );
+                        this.AppendText ( token.Raw, this.Keyword );
                         break;
                 }
             }
@@ -64,7 +64,7 @@ namespace WorkshopUtils.UI
             this.SelectionLength = 0;
         }
 
-        public void AppendText ( string text, Color color )
+        public void AppendText ( String text, Color color )
         {
             this.SelectionStart = this.TextLength;
             this.SelectionLength = 0;

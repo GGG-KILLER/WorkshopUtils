@@ -1,10 +1,12 @@
-﻿using Newtonsoft.Json.Linq;
-using System;
+﻿using System;
 using System.Collections.Specialized;
 using System.Linq;
 using System.Net;
 using System.Text;
 using System.Threading.Tasks;
+using System.Web;
+using Newtonsoft.Json.Linq;
+using WorkshopUtils.UI;
 
 namespace WorkshopUtils
 {
@@ -65,17 +67,30 @@ namespace WorkshopUtils
                 return wc.DownloadFileTaskAsync ( Addon.URL, path );
         }
 
-        public async static Task<WorkshopAddon> GetAddonByIDAsync ( Int32 ID )
+        public async static Task<WorkshopAddon> GetAddonByIDAsync ( Int32 ID, String APIKey )
         {
-            var resp = await WebClientPOSTAsync (
-                "https://api.steampowered.com/ISteamRemoteStorage/GetPublishedFileDetails/v1/",
+            var resp = await WebClientGETAsync (
+                "https://api.steampowered.com/IPublishedFileService/GetDetails/v1/",
                 new NameValueCollection
                 {
-                    { "itemcount", "1" },
-                    { "publishedfileids[0]", ID.ToString ( ) }
+                    { "key", APIKey },
+                    { "publishedfileids[0]", ID.ToString ( ) },
+                    { "includetags", "0" },
+                    { "includeadditionalpreviews", "0" },
+                    { "includechildren", "0" },
+                    { "includekvtags", "0" },
+                    { "includevotes", "0" },
+                    { "short_description", "0" },
+                    { "includeforsaledata", "0" },
+                    { "includemetadata", "0" },
+                    { "return_playtime_stats", "30" },
+                    { "appid", "4000" },
+                    { "strip_description_bbcode", "1" }
                 }
-            );
-            var addon = JToken.Parse ( resp )
+            ).ConfigureAwait(false);
+
+            Dbg.GetTbForm ( resp );
+            WorkshopAddon addon = JToken.Parse ( resp )
                 ["response"]
                 ["publishedfiledetails"]
                 [0]
@@ -109,7 +124,7 @@ namespace WorkshopUtils
             } )
             {
                 var data = JObject.Parse ( await wc.DownloadStringTaskAsync (
-                        "http://api.steampowered.com/IPublishedFileService/QueryFiles/v1/" ) );
+                        "http://api.steampowered.com/IPublishedFileService/QueryFiles/v1/" ).ConfigureAwait(false) );
                 return data["response"]["publishedfiledetails"]
                     .Select ( tok => tok.ToObject<WorkshopAddon> ( ) )
                     .ToArray ( );
@@ -119,7 +134,17 @@ namespace WorkshopUtils
         public static async Task<String> WebClientPOSTAsync ( String URL, NameValueCollection Data )
         {
             using ( var wc = new WebClient ( ) )
-                return Encoding.UTF8.GetString ( await wc.UploadValuesTaskAsync ( URL, Data ) );
+                return Encoding.UTF8.GetString ( await wc.UploadValuesTaskAsync ( URL, Data ).ConfigureAwait ( false ) );
+        }
+
+        public static async Task<String> WebClientGETAsync ( String URL, NameValueCollection Data )
+        {
+            NameValueCollection qstr = HttpUtility.ParseQueryString ( "" );
+            foreach ( String k in Data.AllKeys )
+                qstr.Add ( k, Data[k] );
+
+            using ( var wc = new WebClient ( ) )
+                return await wc.DownloadStringTaskAsync ( $"{URL}?{qstr}" );
         }
     }
 }
