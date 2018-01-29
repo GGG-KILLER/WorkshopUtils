@@ -8,7 +8,7 @@ A workshop utility tool to download GMAD files and extract or look at files in-m
 # Requirements
 - VS 2017 Community (not tested with previous versions)
 - .NET Core SDK
-- .NET Framework 2.6.1
+- .NET Framework 4.6.1
 
 # Re-generating highlight functions list
 1. Copy contents of `highlighter-scrapper.js` to Chrome (should work in other browsers but untested) console
