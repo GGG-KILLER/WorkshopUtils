@@ -1,6 +1,8 @@
 # WorkshopUtils
 A workshop utility tool to download GMAD files and extract or look at files in-memory
 
+This is **broken** now that GMod uses the new workshop system which requires us to use the Steamworks API instead of calling the HTTP IPublishedFileService API.
+
 # Dependencies
 - [GMADFileFormat](https://github.com/GGG-KILLER/GMADFileFormat)
 - [Newtonsoft.Json](http://www.newtonsoft.com/json)
